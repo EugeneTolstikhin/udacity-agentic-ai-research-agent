@@ -1,0 +1,21 @@
+services:
+  udacity-agentic-ai-research-agent:
+    build: .
+    container_name: udacity-agentic-ai-research-agent
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      - .:/app:cached
+    tty: true
+    command:
+      - jupyter
+      - lab
+      - --ip=0.0.0.0
+      - --port=8888
+      - --no-browser
+      - --allow-root
+      - --ServerApp.root_dir=/app
+      - --IdentityProvider.token=
+      - --ServerApp.password=

@@ -1,95 +1,137 @@
 # UdaPlay - AI Game Research Agent Project
 
 ## Project Overview
-UdaPlay is an AI-powered research agent for the video game industry. This project is divided into two main parts that will help you build a sophisticated AI agent capable of answering questions about video games using both local knowledge and web searches.
+
+UdaPlay is an AI-powered research agent for the video game industry. The project is split into two notebook-based parts:
+
+- Part 1: build an offline RAG pipeline with ChromaDB.
+- Part 2: build an agent that combines local retrieval with web search.
+
+The final agent should answer game-related questions using local game data when possible and external search when needed.
 
 ## Project Structure
 
-### Part 1: Offline RAG (Retrieval-Augmented Generation)
-In this part, you'll build a Vector Database using ChromaDB to store and retrieve video game information efficiently.
-
-Key tasks:
-- Set up ChromaDB as a persistent client
-- Create a collection with appropriate embedding functions
-- Process and index game data from JSON files
-- Each game document contains:
-  - Name
-  - Platform
-  - Genre
-  - Publisher
-  - Description
-  - Year of Release
-
-### Part 2: AI Agent Development
-Build an intelligent agent that combines local knowledge with web search capabilities.
-
-The agent will have the following capabilities:
-1. Answer questions using internal knowledge (RAG)
-2. Search the web when needed
-3. Maintain conversation state
-4. Return structured outputs
-5. Store useful information for future use
-
-Required Tools to Implement:
-1. `retrieve_game`: Search the vector database for game information
-2. `evaluate_retrieval`: Assess the quality of retrieved results
-3. `game_web_search`: Perform web searches for additional information
+```text
+project/
+|-- games/                    # JSON files with game data
+|-- lib/                      # Project support code
+|-- Udaplay_01_project.ipynb  # Part 1: offline RAG
+|-- Udaplay_02_project.ipynb  # Part 2: agent workflow
+|-- Dockerfile
+|-- docker-compose.yml
+|-- requirements.txt
+|-- .env
+`-- README.md
+```
 
 ## Requirements
 
-### Environment Setup
-Create a `.env` file with the following API keys:
-```
+- Docker Desktop
+- Python 3.11+ if running outside Docker
+- API keys in a local `.env` file
+
+Create `.env` in the project root with the keys required by the notebooks:
+
+```text
 OPENAI_API_KEY="YOUR_KEY"
 CHROMA_OPENAI_API_KEY="YOUR_KEY"
 TAVILY_API_KEY="YOUR_KEY"
 ```
 
-### Project Dependencies
-- Python 3.11+
-- ChromaDB
-- OpenAI
-- Tavily
-- dotenv
+Do not commit `.env`. The Docker setup loads it at runtime with `env_file`, and `.dockerignore` prevents it from being copied into the image.
 
-### Directory Structure
-```
-project/
-├── starter/
-│   ├── games/           # JSON files with game data
-│   ├── lib/             # Custom library implementations
-│   │   ├── llm.py       # LLM abstractions
-│   │   ├── messages.py  # Message handling
-│   │   ├── ...
-│   │   └── tooling.py   # Tool implementations
-│   ├── Udaplay_01_starter_project.ipynb  # Part 1 implementation
-│   └── Udaplay_02_starter_project.ipynb  # Part 2 implementation
+## Running in Docker
+
+From the project directory:
+
+```powershell
+cd "D:\TOLAREZ\Software Projects\Test projects\udacity-agentic-ai-research-agent"
+docker compose up -d --build
 ```
 
-## Getting Started
+JupyterLab will be available at:
 
-1. Create and activate a virtual environment
-2. Install required dependencies
-3. Set up your `.env` file with necessary API keys
-4. Follow the notebooks in order:
-   - Complete Part 1 to set up your vector database
-   - Complete Part 2 to implement the AI agent
+```text
+http://127.0.0.1:8888
+```
 
-## Testing Your Implementation
+This project disables the Jupyter token/password for local Docker development, so VS Code and your browser should not ask for one.
 
-After completing both parts, test your agent with questions like:
-- "When was Pokémon Gold and Silver released?"
+To stop the container:
+
+```powershell
+docker compose down
+```
+
+## Running Cells in VS Code
+
+1. Start the container with `docker compose up -d --build`.
+2. Open `Udaplay_01_project.ipynb` or `Udaplay_02_project.ipynb` in VS Code.
+3. Click `Select Kernel` in the top-right of the notebook.
+4. Choose `Select Another Kernel`.
+5. Choose `Existing Jupyter Server`.
+6. Enter:
+
+```text
+http://127.0.0.1:8888
+```
+
+7. Select the Python kernel from that Jupyter server.
+
+After that, notebook cells run inside the Docker container. Changes are saved back to this folder because the project directory is mounted into the container at `/app`.
+
+If VS Code still asks for a password, it is probably using an old cached Jupyter connection. Reload the VS Code window and add the existing Jupyter server again with `http://127.0.0.1:8888`.
+
+## Executing a Notebook from the Container
+
+To run Part 1 non-interactively:
+
+```powershell
+docker compose exec udacity-agentic-ai-research-agent jupyter nbconvert --execute --to notebook --inplace Udaplay_01_project.ipynb
+```
+
+To run Part 2:
+
+```powershell
+docker compose exec udacity-agentic-ai-research-agent jupyter nbconvert --execute --to notebook --inplace Udaplay_02_project.ipynb
+```
+
+These commands execute every cell and write outputs back into the notebook file.
+
+## Project Tasks
+
+Part 1 focuses on offline RAG:
+
+- Set up ChromaDB as a persistent client.
+- Create a collection with suitable embedding functions.
+- Process and index game data from JSON files.
+- Retrieve relevant game documents for user questions.
+
+Part 2 focuses on agent development:
+
+- Answer questions using internal game knowledge.
+- Search the web when local retrieval is not enough.
+- Maintain conversation state.
+- Return structured outputs.
+- Store useful information for future use.
+
+Required tools to implement:
+
+- `retrieve_game`: search the vector database for game information.
+- `evaluate_retrieval`: assess the quality of retrieved results.
+- `game_web_search`: search the web for additional information.
+
+## Testing
+
+After completing both notebooks, test the agent with questions like:
+
+- "When was Pokemon Gold and Silver released?"
 - "Which one was the first 3D platformer Mario game?"
 - "Was Mortal Kombat X released for PlayStation 5?"
 
-## Advanced Features
-
-After completing the basic implementation, you can enhance your agent with:
-- Long-term memory capabilities
-- Additional tools and capabilities
-
 ## Notes
-- Make sure to implement proper error handling
-- Follow best practices for API key management
-- Document your code thoroughly
-- Test your implementation with various types of queries
+
+- Keep API keys in `.env`.
+- Use Docker if you want the same environment for VS Code and notebook execution.
+- Avoid `docker compose config` if you do not want Compose to print expanded environment values.
+- Run the notebooks in order: Part 1 first, then Part 2.
